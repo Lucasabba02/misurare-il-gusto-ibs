@@ -23,6 +23,9 @@ Il progetto prevede:
 5. analisi quantitativa tramite Python;
 6. interpretazione critica dei risultati.
 
+### Motivazione della scelta del metodo di acquisizione
+Per la raccolta dei dati è stato utilizzato il **web scraping delle pagine HTML pubblicamente accessibili di IBS.it**, anziché il ricorso alle API. La scelta è dovuta principalmente al fatto che le API disponibili di IBS non forniscono un'interfaccia pubblica e documentata specificamente orientata all'accesso ai dati necessari per questo progetto, in particolare alla **classifica dei libri e alle relative descrizioni promozionali**. Lo scraping dell'HTML ha quindi permesso di raccogliere direttamente le informazioni effettivamente visualizzate agli utenti sul sito, mantenendo coerenza tra i dati utilizzati nell'analisi e il contenuto pubblico della piattaforma.
+
 ## Stato del progetto
 
 Fase 1 completata: raccolta e controllo dei 100 libri della classifica IBS. Con la prima fase del progetto e il primo codice generato, dal sito web di IBS, e nello specifico dalla pagina dedicata alla classifica settimanale dei libri venduti, abbiamo estratto POSIZIONE, TITOLO, AUTORE, URL, RATING, NUMERO DI RECENSIONI, CATEGORIA, EDITORE e ANNO dei libri presenti nella top 100. Bisogna considerare per correttezza che nella top 100 dei libri venduti appaiono anche i preordini di libri non ancora usciti, che quindi non avranno né recensioni né rating. 
