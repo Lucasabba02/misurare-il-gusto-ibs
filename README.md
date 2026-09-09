@@ -47,3 +47,6 @@ Il dataset contiene le seguenti informazioni:
 - autore
 - URL della pagina IBS
 - descrizione completa
+
+## Pulizia del file
+Controllando che il file CSV fosse pulito ho notato che nella descrizione compariva sempre "Leggi di più leggi di meno". Su Colab ho quindi inserito uno script per eliminare queste scritte che avrebbero creato rumore nell'analisi delle descrizioni. 
