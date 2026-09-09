@@ -1,52 +1,247 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import csv
+import io
 import time
-import re
 from google.colab import files
 
 
 # ========================================================
-# 1. CARICAMENTO DEL CSV DELLA FASE 1
+# 1. CARICAMENTO DATASET DELLA FASE 1
 # ========================================================
 
 print("=" * 60)
 print("CARICAMENTO DATASET FASE 1")
 print("=" * 60)
 
-# Se il file non è ancora presente in Colab,
-# questa finestra permette di caricarlo.
 caricati = files.upload()
 
-nome_file_fase1 = "classifica_ibs_fase1.csv"
+if not caricati:
+    raise FileNotFoundError(
+        "Nessun file è stato caricato."
+    )
 
-if nome_file_fase1 not in caricati:
-    print(
-        f"\n⚠️ ATTENZIONE: non è stato trovato "
-        f"'{nome_file_fase1}'."
-    )
-else:
-    print(
-        f"\n✅ File '{nome_file_fase1}' caricato correttamente."
-    )
+nome_file_fase1 = list(caricati.keys())[0]
+
+print(
+    f"\n✅ File utilizzato: {nome_file_fase1}"
+)
 
 
 # ========================================================
-# 2. LETTURA DEL CSV
+# 2. LETTURA ROBUSTA DEL CSV
 # ========================================================
 
+print("\nLettura del dataset...")
+
+
+# Prima prova con la lettura normale
 df_fase1 = pd.read_csv(
     nome_file_fase1,
     encoding="utf-8-sig"
 )
 
+
+# ========================================================
+# 3. CONTROLLO DELLA LETTURA
+# ========================================================
+
+colonne_attese = [
+    "posizione",
+    "titolo",
+    "autore",
+    "url",
+    "rating",
+    "numero_recensioni",
+    "categoria",
+    "editore_anno"
+]
+
+
+# Se il dataset è stato letto correttamente,
+# lo utilizziamo direttamente.
+lettura_corretta = (
+    all(
+        colonna in df_fase1.columns
+        for colonna in colonne_attese
+    )
+    and
+    df_fase1["url"].notna().sum() > 0
+)
+
+
+# ========================================================
+# 4. RECUPERO DI UN EVENTUALE CSV MALFORMATO
+# ========================================================
+
+if not lettura_corretta:
+
+    print(
+        "\n⚠️ Il CSV non è stato interpretato "
+        "correttamente."
+    )
+
+    print(
+        "Tentativo di ricostruzione automatica..."
+    )
+
+
+    # ----------------------------------------------------
+    # Lettura del file come testo
+    # ----------------------------------------------------
+
+    with open(
+        nome_file_fase1,
+        "r",
+        encoding="utf-8-sig",
+        newline=""
+    ) as file:
+
+        testo = file.read()
+
+
+    # ----------------------------------------------------
+    # Separazione delle righe
+    # ----------------------------------------------------
+
+    lettore = csv.reader(
+        io.StringIO(testo),
+        delimiter=",",
+        quotechar='"'
+    )
+
+    righe = list(lettore)
+
+
+    # ----------------------------------------------------
+    # Controllo intestazione
+    # ----------------------------------------------------
+
+    intestazione = righe[0]
+
+    print(
+        "\nIntestazione trovata:"
+    )
+
+    print(
+        intestazione
+    )
+
+
+    # ----------------------------------------------------
+    # Ricostruzione delle righe
+    # ----------------------------------------------------
+
+    righe_corrette = []
+
+    for riga in righe[1:]:
+
+        # Ignora righe vuote
+        if not riga:
+            continue
+
+
+        # Caso normale:
+        # la riga contiene già tutte le colonne
+        if len(riga) == 8:
+
+            righe_corrette.append(riga)
+
+            continue
+
+
+        # Caso problematico:
+        # tutta la riga è stata salvata
+        # come un unico campo.
+        if len(riga) == 1:
+
+            contenuto = riga[0]
+
+            lettura_interna = csv.reader(
+                io.StringIO(contenuto),
+                delimiter=",",
+                quotechar='"'
+            )
+
+            riga_ricostruita = next(
+                lettura_interna
+            )
+
+            if len(riga_ricostruita) == 8:
+
+                righe_corrette.append(
+                    riga_ricostruita
+                )
+
+            else:
+
+                print(
+                    "⚠️ Riga non ricostruibile:",
+                    contenuto[:100]
+                )
+
+
+    # ----------------------------------------------------
+    # Creazione DataFrame ricostruito
+    # ----------------------------------------------------
+
+    df_fase1 = pd.DataFrame(
+        righe_corrette,
+        columns=colonne_attese
+    )
+
+
+# ========================================================
+# 5. CONVERSIONE DELLE COLONNE NUMERICHE
+# ========================================================
+
+df_fase1["posizione"] = pd.to_numeric(
+    df_fase1["posizione"],
+    errors="coerce"
+)
+
+df_fase1["rating"] = pd.to_numeric(
+    df_fase1["rating"],
+    errors="coerce"
+)
+
+df_fase1["numero_recensioni"] = pd.to_numeric(
+    df_fase1["numero_recensioni"],
+    errors="coerce"
+)
+
+
+# ========================================================
+# 6. RIMOZIONE EVENTUALI RIGHE NON VALIDE
+# ========================================================
+
+df_fase1 = df_fase1[
+    df_fase1["posizione"].notna()
+].copy()
+
+
+df_fase1 = df_fase1.sort_values(
+    "posizione"
+).reset_index(drop=True)
+
+
+# ========================================================
+# 7. CONTROLLO DATASET
+# ========================================================
+
+print("\n")
+print("=" * 60)
+print("CONTROLLO DATASET FASE 1")
+print("=" * 60)
+
 print(
-    "\nNumero libri presenti nel dataset:",
+    "Numero libri presenti:",
     len(df_fase1)
 )
 
 print(
-    "\nColonne presenti:"
+    "\nColonne:"
 )
 
 print(
@@ -54,29 +249,79 @@ print(
 )
 
 
-# ========================================================
-# 3. CONTROLLO DEI 100 LIBRI
-# ========================================================
+# Controllo URL
+url_presenti = (
+    df_fase1["url"]
+    .notna()
+    .sum()
+)
+
+print(
+    "\nURL presenti:",
+    url_presenti
+)
+
 
 if len(df_fase1) == 100:
 
     print(
-        "\n✅ Il dataset contiene esattamente 100 libri."
+        "✅ Il dataset contiene 100 libri."
     )
 
 else:
 
     print(
-        f"\n⚠️ ATTENZIONE: il dataset contiene "
-        f"{len(df_fase1)} libri invece di 100."
+        f"⚠️ Il dataset contiene "
+        f"{len(df_fase1)} libri."
+    )
+
+
+if url_presenti == 100:
+
+    print(
+        "✅ Tutti i 100 libri hanno un URL."
+    )
+
+else:
+
+    print(
+        "⚠️ Alcuni URL risultano mancanti."
     )
 
 
 # ========================================================
-# 4. IMPOSTAZIONI SCRAPING
+# 8. CONTROLLO DI UNA RIGA
 # ========================================================
 
-BASE_URL = "https://www.ibs.it"
+print("\n")
+print("=" * 60)
+print("PRIMO LIBRO")
+print("=" * 60)
+
+print(
+    "Posizione:",
+    df_fase1.iloc[0]["posizione"]
+)
+
+print(
+    "Titolo:",
+    df_fase1.iloc[0]["titolo"]
+)
+
+print(
+    "Autore:",
+    df_fase1.iloc[0]["autore"]
+)
+
+print(
+    "URL:",
+    df_fase1.iloc[0]["url"]
+)
+
+
+# ========================================================
+# 9. IMPOSTAZIONI SCRAPING
+# ========================================================
 
 headers = {
     "User-Agent": (
@@ -88,29 +333,10 @@ headers = {
 
 
 # ========================================================
-# 5. FUNZIONE DI PULIZIA DELLA DESCRIZIONE
+# 10. RACCOLTA DELLE DESCRIZIONI
 # ========================================================
 
-def pulisci_descrizione(testo):
-
-    if not testo:
-        return None
-
-    # Sostituisce spazi multipli, tab e ritorni a capo
-    testo = re.sub(
-        r"\s+",
-        " ",
-        testo
-    )
-
-    return testo.strip()
-
-
-# ========================================================
-# 6. RACCOLTA DELLE DESCRIZIONI
-# ========================================================
-
-risultati = []
+descrizioni = []
 
 print("\n")
 print("=" * 60)
@@ -122,16 +348,18 @@ for indice, riga in df_fase1.iterrows():
 
     posizione = riga["posizione"]
     titolo = riga["titolo"]
-    autore = riga["autore"]
     url_libro = riga["url"]
 
     print("\n" + "-" * 60)
+
     print(
-        f"Libro {indice + 1}/100"
+        f"Libro {indice + 1}/{len(df_fase1)}"
     )
+
     print(
         f"Posizione: {posizione}"
     )
+
     print(
         f"Titolo: {titolo}"
     )
@@ -143,21 +371,17 @@ for indice, riga in df_fase1.iterrows():
 
     if pd.isna(url_libro) or not str(url_libro).strip():
 
-        print("⚠️ URL mancante.")
+        print(
+            "⚠️ URL mancante."
+        )
 
-        risultati.append({
-            "posizione": posizione,
-            "titolo": titolo,
-            "autore": autore,
-            "url": url_libro,
-            "descrizione": None
-        })
+        descrizioni.append(None)
 
         continue
 
 
     # ----------------------------------------------------
-    # RICHIESTA DELLA PAGINA
+    # RICHIESTA PAGINA IBS
     # ----------------------------------------------------
 
     try:
@@ -176,17 +400,11 @@ for indice, riga in df_fase1.iterrows():
     except requests.RequestException as errore:
 
         print(
-            "⚠️ Errore durante la richiesta:",
+            "⚠️ Errore richiesta:",
             errore
         )
 
-        risultati.append({
-            "posizione": posizione,
-            "titolo": titolo,
-            "autore": autore,
-            "url": url_libro,
-            "descrizione": None
-        })
+        descrizioni.append(None)
 
         time.sleep(2)
 
@@ -203,13 +421,7 @@ for indice, riga in df_fase1.iterrows():
             "⚠️ Pagina non disponibile."
         )
 
-        risultati.append({
-            "posizione": posizione,
-            "titolo": titolo,
-            "autore": autore,
-            "url": url_libro,
-            "descrizione": None
-        })
+        descrizioni.append(None)
 
         time.sleep(2)
 
@@ -227,7 +439,7 @@ for indice, riga in df_fase1.iterrows():
 
 
     # ----------------------------------------------------
-    # RICERCA DELLA SEZIONE DESCRIZIONE
+    # SEZIONE DESCRIZIONE
     # ----------------------------------------------------
 
     elemento_descrizione = soup.select_one(
@@ -237,13 +449,13 @@ for indice, riga in df_fase1.iterrows():
 
     if elemento_descrizione:
 
+        # In questa fase NON facciamo alcuna pulizia.
+        # Raccogliamo il testo così come presente
+        # nella sezione HTML "Descrizione".
+
         descrizione = elemento_descrizione.get_text(
             " ",
             strip=True
-        )
-
-        descrizione = pulisci_descrizione(
-            descrizione
         )
 
         print(
@@ -259,46 +471,59 @@ for indice, riga in df_fase1.iterrows():
         )
 
 
-    # ----------------------------------------------------
-    # SALVATAGGIO RISULTATO
-    # ----------------------------------------------------
-
-    risultati.append({
-        "posizione": posizione,
-        "titolo": titolo,
-        "autore": autore,
-        "url": url_libro,
-        "descrizione": descrizione
-    })
+    descrizioni.append(
+        descrizione
+    )
 
 
     # ----------------------------------------------------
-    # PAUSA TRA LE RICHIESTE
+    # PAUSA
     # ----------------------------------------------------
 
     time.sleep(2)
 
 
 # ========================================================
-# 7. CREAZIONE DATAFRAME FASE 2
+# 11. CREAZIONE DATASET FASE 2
 # ========================================================
 
-df_descrizioni = pd.DataFrame(
-    risultati
-)
+df_fase2 = df_fase1.copy()
+
+df_fase2["descrizione"] = descrizioni
 
 
 # ========================================================
-# 8. ORDINAMENTO
+# 12. ORDINE COLONNE
 # ========================================================
 
-df_descrizioni = df_descrizioni.sort_values(
+colonne_fase2 = [
+    "posizione",
+    "titolo",
+    "autore",
+    "url",
+    "rating",
+    "numero_recensioni",
+    "categoria",
+    "editore_anno",
+    "descrizione"
+]
+
+df_fase2 = df_fase2[
+    colonne_fase2
+]
+
+
+# ========================================================
+# 13. ORDINAMENTO
+# ========================================================
+
+df_fase2 = df_fase2.sort_values(
     "posizione"
 ).reset_index(drop=True)
 
 
 # ========================================================
-# 9. CONTROLLO FINALE
+# 14. CONTROLLO FINALE
 # ========================================================
 
 print("\n")
@@ -306,32 +531,45 @@ print("=" * 60)
 print("CONTROLLO FINALE FASE 2")
 print("=" * 60)
 
+print(
+    "Numero libri:",
+    len(df_fase2)
+)
 
 print(
-    "Numero totale di libri:",
-    len(df_descrizioni)
+    "Numero colonne:",
+    len(df_fase2.columns)
+)
+
+print(
+    "\nColonne:"
+)
+
+print(
+    df_fase2.columns.tolist()
 )
 
 
-descrizioni_mancanti = (
-    df_descrizioni["descrizione"]
-    .isna()
-    .sum()
-)
-
+# ========================================================
+# 15. CONTROLLO DESCRIZIONI
+# ========================================================
 
 descrizioni_presenti = (
-    df_descrizioni["descrizione"]
+    df_fase2["descrizione"]
     .notna()
     .sum()
 )
 
-
-print(
-    "Descrizioni raccolte:",
-    descrizioni_presenti
+descrizioni_mancanti = (
+    df_fase2["descrizione"]
+    .isna()
+    .sum()
 )
 
+print(
+    "\nDescrizioni raccolte:",
+    descrizioni_presenti
+)
 
 print(
     "Descrizioni mancanti:",
@@ -340,7 +578,7 @@ print(
 
 
 # ========================================================
-# 10. CONTROLLO POSIZIONI
+# 16. CONTROLLO POSIZIONI
 # ========================================================
 
 posizioni_attese = set(
@@ -348,7 +586,7 @@ posizioni_attese = set(
 )
 
 posizioni_trovate = set(
-    df_descrizioni["posizione"]
+    df_fase2["posizione"]
 )
 
 posizioni_mancanti = sorted(
@@ -371,41 +609,46 @@ else:
 
 
 # ========================================================
-# 11. PRIME 5 RIGHE
+# 17. VALORI MANCANTI
 # ========================================================
 
-print("\n")
-print("=" * 60)
-print("PRIME 5 RIGHE")
-print("=" * 60)
+print(
+    "\nValori mancanti per colonna:"
+)
 
 print(
-    df_descrizioni[
-        [
-            "posizione",
-            "titolo",
-            "autore",
-            "descrizione"
-        ]
-    ]
-    .head(5)
-    .to_string(index=False)
+    df_fase2.isna().sum()
 )
 
 
 # ========================================================
-# 12. SALVATAGGIO CSV
+# 18. PRIME 3 RIGHE
+# ========================================================
+
+print("\n")
+print("=" * 60)
+print("PRIME 3 RIGHE")
+print("=" * 60)
+
+print(
+    df_fase2.head(3).to_string(
+        index=False
+    )
+)
+
+
+# ========================================================
+# 19. SALVATAGGIO CSV
 # ========================================================
 
 nome_file_output = "classifica_ibs_fase2.csv"
 
-df_descrizioni.to_csv(
+df_fase2.to_csv(
     nome_file_output,
     index=False,
     sep=";",
     encoding="utf-8-sig"
 )
-
 
 print(
     f"\n✅ File salvato come: {nome_file_output}"
@@ -413,7 +656,7 @@ print(
 
 
 # ========================================================
-# 13. CONTROLLO DEL CSV APPENA SALVATO
+# 20. CONTROLLO CSV SALVATO
 # ========================================================
 
 df_controllo = pd.read_csv(
@@ -422,24 +665,20 @@ df_controllo = pd.read_csv(
     encoding="utf-8-sig"
 )
 
-
 print("\n")
 print("=" * 60)
 print("CONTROLLO DEL CSV SALVATO")
 print("=" * 60)
-
 
 print(
     "Numero righe:",
     len(df_controllo)
 )
 
-
 print(
     "Numero colonne:",
     len(df_controllo.columns)
 )
-
 
 print(
     "Colonne:"
@@ -452,22 +691,22 @@ print(
 
 if (
     len(df_controllo) == 100
-    and len(df_controllo.columns) == 5
+    and len(df_controllo.columns) == 9
 ):
 
     print(
-        "\n✅ CSV Fase 2 creato correttamente."
+        "\n✅ DATASET FASE 2 CREATO CORRETTAMENTE."
     )
 
 else:
 
     print(
-        "\n⚠️ Controllare il file generato."
+        "\n⚠️ ATTENZIONE: controllare il dataset."
     )
 
 
 # ========================================================
-# 14. DOWNLOAD DEL CSV
+# 21. DOWNLOAD
 # ========================================================
 
 print("\n")
