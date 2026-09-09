@@ -50,3 +50,5 @@ Il dataset contiene le seguenti informazioni:
 
 ## Pulizia del file
 Controllando che il file CSV fosse pulito ho notato che nella descrizione compariva sempre "Leggi di più leggi di meno". Su Colab ho quindi inserito uno script per eliminare queste scritte che avrebbero creato rumore nell'analisi delle descrizioni. 
+Ho notato inoltre che il libro n°87 non contiene una descrizione. Si tratta di un libro scolastico. Ignoreremo la cosa. 
+
