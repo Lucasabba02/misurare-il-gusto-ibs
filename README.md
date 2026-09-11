@@ -53,5 +53,23 @@ Controllando che il file CSV fosse pulito ho notato che nella descrizione compar
 Ho notato inoltre che il libro n°87 non contiene una descrizione. Si tratta di un libro scolastico. Ignoreremo la cosa. 
 Inoltre, nelle descrizioni dei libri veniva sempre copiata all'inizio la parola "Descrizione", che evidentemente faceva parte dell'interfaccia di IBS. Con il secondo script di pulizia, ho eliminato questa parola. 
 
+## Fase 3 – Analisi dei dati
+
+Una volta completata la raccolta e la pulizia delle descrizioni, è stata avviata l'analisi dei dati raccolti.
+In una prima fase esplorativa sono state calcolate alcune caratteristiche quantitative delle descrizioni:
+
+- numero di parole;
+- numero di caratteri;
+- numero di frasi;
+- numero di domande;
+- numero di citazioni;
+- presenza di premi o riconoscimenti;
+- presenza della sezione "Argomenti".
+
+Queste variabili sono state confrontate con la posizione dei libri nella classifica, sia considerando la posizione come variabile numerica, sia confrontando diverse fasce della classifica. L'analisi esplorativa costituisce il punto di partenza per l'analisi successiva delle caratteristiche linguistiche e promozionali delle descrizioni.
+I dati ottenuti finora non permettono un'analisi approfondita dell'eventuale correlazione tra descrizioni promozionali e posizione in classifica. L'unico nato degno di nota, seppur da approfondire è quello che indica la presenza di premi o riconoscimenti nelle descrizioni: i libri che contengono questi elementi tendono a essere più in alto in classifica. 
+
+
+
 
 
