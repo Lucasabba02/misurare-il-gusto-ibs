@@ -69,6 +69,24 @@ In una prima fase esplorativa sono state calcolate alcune caratteristiche quanti
 Queste variabili sono state confrontate con la posizione dei libri nella classifica, sia considerando la posizione come variabile numerica, sia confrontando diverse fasce della classifica. L'analisi esplorativa costituisce il punto di partenza per l'analisi successiva delle caratteristiche linguistiche e promozionali delle descrizioni.
 I dati ottenuti finora non permettono un'analisi approfondita dell'eventuale correlazione tra descrizioni promozionali e posizione in classifica. L'unico nato degno di nota, seppur da approfondire è quello che indica la presenza di premi o riconoscimenti nelle descrizioni: i libri che contengono questi elementi tendono a essere più in alto in classifica. 
 
+Successivamente è stata analizzata la presenza di quattro categorie di linguaggio promozionale:
+
+1. valutativi positivi;
+2. premi, riconoscimenti e segnali di successo;
+3. novità e attesa;
+4. coinvolgimento del lettore.
+
+Le categorie sono state costruite attraverso liste di termini ed espressioni definite in modo esplicito e riproducibile. Per tenere conto della diversa lunghezza delle descrizioni, le occorrenze sono state normalizzate per 100 parole. 
+Le quattro categorie sono state confrontate con la posizione nella classifica attraverso correlazioni e, successivamente, mediante un confronto tra i libri nelle prime 25 posizioni e quelli classificati dal 26° al 100° posto.
+Per verificare la significatività delle differenze tra i due gruppi è stato utilizzato il test di Mann–Whitney U.
+
+Tra i risultati principali, la categoria "novità/attesa" mostra una differenza statisticamente significativa tra Top 25 e resto della classifica (p = 0,0079). Le altre categorie non raggiungono la soglia convenzionale di significatività statistica.
+
+## FASE 4: CONCLUSIONI PERSONALI
+Al termine di questa analisi, dopo aver osservato attentamente i dati ottenuti e i grafici con le loro correlazioni, possiamo giungere a delle conclusioni. Un pattern sulla correlazione tra la descrizione promozionale e la posizione in classifica dei libri è visibile, ma non è particolarmente rilevante: se è pur vero che dai grafici ottenuti. Se è vero che la presenza nelle descrizioni di riferimenti a premi, riconoscimenti e successo, a parole riguardanti la novità e l'attesa, e al coinvolgimento del lettore, in alcuni casi è tripla nella top 25, rispetto alla restante top 26-100, non dobbiamo farci ingannare dalle immagini; la ricorrenza dei vari termini infatti è più vicina di quanto sembri. 
+Tra tutti i dati raccolti, in termini assoluti, forse merita una certa importanza il dizionario relativo alla novità, che spicca tra quelli presentati; è particolarmente presente nella TOP25 e questo potrebbe essere dovuto al fatto che qui troviamo molti libri che sono appena usciti o che devono ancora uscire (sono quindi in pre-ordine, ma rientrano già nelle classifiche settimanali). Probabilmente, invece, i libri che tendono a essere usciti da tempo o i classici (che quindi non indicano parole relative alla novità) appaiono più in fondo alla classifica. 
+Anche se presenta numeri bassi in senso assoluto, noterei anche la presenza di lessico relativo a premi e riconoscimenti nella parte alta della classifica. 
+
 
 
 
