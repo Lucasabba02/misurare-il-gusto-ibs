@@ -81,6 +81,8 @@ Le quattro categorie sono state confrontate con la posizione nella classifica at
 Per verificare la significatività delle differenze tra i due gruppi è stato utilizzato il test di Mann–Whitney U.
 
 Tra i risultati principali, la categoria "novità/attesa" mostra una differenza statisticamente significativa tra Top 25 e resto della classifica (p = 0,0079). Le altre categorie non raggiungono la soglia convenzionale di significatività statistica.
+<img width="1089" height="590" alt="image" src="https://github.com/user-attachments/assets/d6eb3a75-a92f-4c48-9aad-f2ba7e7d86ed" />
+
 
 ## FASE 4: CONCLUSIONI PERSONALI
 Al termine di questa analisi, dopo aver osservato attentamente i dati ottenuti e i grafici con le loro correlazioni, possiamo giungere a delle conclusioni. Un pattern sulla correlazione tra la descrizione promozionale e la posizione in classifica dei libri è visibile, ma non è particolarmente rilevante: se è pur vero che dai grafici ottenuti. Se è vero che la presenza nelle descrizioni di riferimenti a premi, riconoscimenti e successo, a parole riguardanti la novità e l'attesa, e al coinvolgimento del lettore, in alcuni casi è tripla nella top 25, rispetto alla restante top 26-100, non dobbiamo farci ingannare dalle immagini; la ricorrenza dei vari termini infatti è più vicina di quanto sembri. 
