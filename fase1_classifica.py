@@ -491,3 +491,36 @@ df.to_csv(
 print(
     f"\n✅ File salvato come: {nome_file}"
 )
+
+from google.colab import files
+
+files.download("classifica_ibs_fase1.csv")
+
+# Controlli di qualità del dataset
+
+print("=== CONTROLLO DATASET ===")
+
+print("\nRighe totali:", len(df))
+
+print("\nPosizioni duplicate:")
+print(df[df["posizione"].duplicated(keep=False)][["posizione", "titolo"]])
+
+print("\nURL duplicati:")
+print(df[df["url"].duplicated(keep=False)][["posizione", "titolo", "url"]])
+
+print("\nTitoli duplicati:")
+print(df[df["titolo"].duplicated(keep=False)][["posizione", "titolo"]])
+
+print("\nValori mancanti:")
+print(df.isna().sum())
+
+print("\nPosizioni mancanti:")
+posizioni_attese = set(range(1, 101))
+posizioni_trovate = set(df["posizione"])
+print(sorted(posizioni_attese - posizioni_trovate))
+
+print("\nPosizioni extra:")
+print(sorted(posizioni_trovate - posizioni_attese))
+
+print("\nControllo libro posizione 70:")
+print(df[df["posizione"] == 70].T)
